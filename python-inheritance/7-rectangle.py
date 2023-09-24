@@ -1,44 +1,38 @@
-"""meta class to remove __init_subclass__"""
-class ExcludeInitSubclassMeta(type):
-    """remove __init_subclass__"""
-    def __dir__(cls):
-        attributes = super().__dir__()
-        return [attr for attr in attributes if attr != "__init_subclass__"]
+#!/usr/bin/python3
+"""
+This module contains the Rectangle class that inherits from BaseGeometry.
+"""
 
-"""creation of an empty class"""
-class BaseGeometry(metaclass=ExcludeInitSubclassMeta):
-    """the empty class"""
-    def __dir__(cls)->None:
-        attributes = super().__dir__()
-        n_attributes=[]
-        for attr in attributes:
-            if attr !="__init_subclass__":
-                n_attributes.append(attr)
-        attributes=n_attributes
-        return attributes
-    
-    def area(self):
-         raise Exception("area() is not implemented")
-    def integer_validator(self, name, value):
-        """this validaes value"""
-        if type(value)!=int:
-            raise TypeError("{} must be an integer".format(name))
-        if value<0 or value==0:
-            raise ValueError("{} must be greater than 0".format(name))
+BaseGeometry = __import__('5-base_geometry').BaseGeometry
 
 
-"""class that takes in width and height"""
 class Rectangle(BaseGeometry):
-    """class that takes in width and height and validates it"""
+    """
+    A class named Rectangle that inherits from BaseGeometry.
+    """
 
     def __init__(self, width, height):
-        """the init function"""
-        self.__width=width
-        self.__height=height
-        super().integer_validator("width",self.__width)
-        super().integer_validator("height",self.__height)
+        """
+        Initializes a Rectangle instance.
+        Args:
+            width (int): The width of the rectangle.
+            height (int): The height of the rectangle.
+        """
+        # Validate and set width and height using the integer_validator method
+        self.integer_validator("width", width)
+        self.integer_validator("height", height)
+        # Set width and height as private attributes
+        self.__width = width
+        self.__height = height
+
+    def area(self):
+        """
+        Calculates and returns the area of the rectangle.
+        """
+        return self.__width * self.__height
 
     def __str__(self):
-        return ("[Rectangle] {}/{}".format(self.__width,self.__height))
-    def area(self):
-        return(self.__width*self.__height)
+        """
+        Returns a string representation of the rectangle.
+        """
+        return "[Rectangle] {}/{}".format(self.__width, self.__height)

@@ -1,21 +1,31 @@
-"""meta class to remove __init_subclass__"""
-class ExcludeInitSubclassMeta(type):
-    """remove __init_subclass__"""
-    def __dir__(cls):
-        attributes = super().__dir__()
-        return [attr for attr in attributes if attr != "__init_subclass__"]
+"""
+Module: 4-base_geometry
 
-"""creation of an empty class"""
-class BaseGeometry(metaclass=ExcludeInitSubclassMeta):
-    """the empty class"""
-    def __dir__(cls)->None:
-        attributes = super().__dir__()
-        n_attributes=[]
-        for attr in attributes:
-            if attr !="__init_subclass__":
-                n_attributes.append(attr)
-        attributes=n_attributes
-        return attributes
-    
+Contains a class definition for BaseGeometry
+with a public instance method.
+"""
+
+
+class BaseGeometry:
+    """
+    A class representing the base geometry.
+    """
+
     def area(self):
-         raise Exception("area() is not implemented")
+        """
+        Calculate the area of the geometry.
+
+        Raises:
+            Exception: This method is not implemented.
+
+        """
+        raise Exception("area() is not implemented")
+
+    def __dir__(self):
+        """
+        Customize the list of attributes and methods returned by dir().
+
+        Returns:
+            A list of attributes and methods including 'area'.
+        """
+        return sorted(dir(type(self)) + list(self.__dict__) + ['area'])

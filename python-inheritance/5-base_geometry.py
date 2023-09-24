@@ -1,27 +1,31 @@
-"""meta class to remove __init_subclass__"""
-class ExcludeInitSubclassMeta(type):
-    """remove __init_subclass__"""
-    def __dir__(cls):
-        attributes = super().__dir__()
-        return [attr for attr in attributes if attr != "__init_subclass__"]
+#!/usr/bin/python3
+"""
+This module contains the BaseGeometry class.
+"""
 
-"""creation of an empty class"""
-class BaseGeometry(metaclass=ExcludeInitSubclassMeta):
-    """the empty class"""
-    def __dir__(cls)->None:
-        attributes = super().__dir__()
-        n_attributes=[]
-        for attr in attributes:
-            if attr !="__init_subclass__":
-                n_attributes.append(attr)
-        attributes=n_attributes
-        return attributes
-    
+
+class BaseGeometry:
+    """
+    A class named BaseGeometry.
+    """
+
     def area(self):
-         raise Exception("area() is not implemented")
+        """
+        Placeholder method for calculating the area.
+        """
+        raise Exception("area() is not implemented")
+
     def integer_validator(self, name, value):
-        """this validaes value"""
-        if type(value)!=int:
-            raise TypeError("{} must be an integer".format(name))
-        if value<0 or value==0:
-            raise ValueError("{} must be greater than 0".format(name))
+        """
+        Validates that value is a positive integer.
+        Args:
+            name (str): The name of the value.
+            value (int): The value to be validated.
+        Raises:
+            TypeError: If value is not an integer.
+            ValueError: If value is not a positive integer.
+        """
+        if not isinstance(value, int):
+            raise TypeError(f"{name} must be an integer")
+        if value <= 0:
+            raise ValueError(f"{name} must be greater than 0")

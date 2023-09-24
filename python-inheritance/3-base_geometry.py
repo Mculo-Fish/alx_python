@@ -1,19 +1,17 @@
-"""meta class to remove __init_subclass__"""
-class ExcludeInitSubclassMeta(type):
-    """remove __init_subclass__"""
-    def __dir__(cls):
-        attributes = super().__dir__()
-        return [attr for attr in attributes if attr != "__init_subclass__"]
+"""
+Contains an empty class definition for BaseGeometry.
+"""
 
-"""creation of an empty class"""
-class BaseGeometry(metaclass=ExcludeInitSubclassMeta):
-    """the empty class"""
-    def __dir__(cls)->None:
-        attributes = super().__dir__()
-        n_attributes=[]
-        for attr in attributes:
-            if attr !="__init_subclass__":
-                n_attributes.append(attr)
-        attributes=n_attributes
-        return attributes
-    
+
+class BaseGeometry:
+    """
+    An empty class representing the base geometry.
+    """
+    def __init_subclass__(cls):
+        pass
+
+    def __dir__(self):
+        return [attr for attr in dir(type(self)) if attr != '__init_subclass__']
+
+    def __class__(self):
+        return type(self)
