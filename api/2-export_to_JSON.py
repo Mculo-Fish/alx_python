@@ -1,49 +1,58 @@
+"""
+This module exports data in the JSON format.
+"""
+
+import json
 import requests
 import sys
-import json
 
-def get_employee_data(employee_id):
-    # Get employee details from the API
-    employee_url = f"https://jsonplaceholder.typicode.com/users/{employee_id}"
-    employee_response = requests.get(employee_url)
-    employee_data = employee_response.json()
-    
-    # Get employee's TODO list from the API
-    todos_url = f"https://jsonplaceholder.typicode.com/users/{employee_id}/todos"
+def get_employee_info(employee_id):
+    # Define the API endpoints
+    user_url = f'https://jsonplaceholder.typicode.com/users/{employee_id}'
+    todos_url = f'https://jsonplaceholder.typicode.com/users/{employee_id}/todos'
+
+    # Fetch employee information
+    user_response = requests.get(user_url)
+    user_data = user_response.json()
+
+    if 'id' not in user_data:
+        print(f"USER_ID {employee_id} is not valid.")
+        return
+
+    employee_id = user_data.get('id')
+    employee_name = user_data.get('username')
+
+    # Fetch employee's TODO list
     todos_response = requests.get(todos_url)
     todos_data = todos_response.json()
 
-    return employee_data, todos_data
+    # Create a JSON data structure
+    employee_json_data = {
+        "USER_ID": [
+            {
+                "task": todo['title'],
+                "completed": todo['completed'],
+                "username": employee_name
+            }
+            for todo in todos_data
+        ]
+    }
 
-def export_to_json(employee_id, employee_name, todos):
-    # Create a JSON file with the specified format
-    filename = f"{employee_id}.json"
+    # Write JSON data to a file
+    json_filename = f'{employee_id}.json'
+    with open(json_filename, 'w') as json_file:
+        json.dump(employee_json_data, json_file, indent=4)
 
-    data = {str(employee_id): [{"task": todo['title'], "completed": todo['completed'], "username": employee_name} for todo in todos]}
-
-    with open(filename, 'w') as file:
-        json.dump(data, file)
-
-    print(f"Data exported to {filename}")
-
-def main():
-    # Check if the correct number of command-line arguments is provided
-    if len(sys.argv) != 2 or not sys.argv[1].isdigit():
-        print("Usage: python script.py <employee_id>")
-        sys.exit(1)
-
-    # Parse the employee ID from the command-line argument
-    employee_id = int(sys.argv[1])
-
-    # Get employee data from the API
-    employee, todos = get_employee_data(employee_id)
-
-    # Extract relevant information
-    employee_name = employee.get('name')
-
-    # Display the information and export to JSON
-    export_to_json(employee_id, employee_name, todos)
+    print(f"Data has been exported to {json_filename}.")
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 2:
+        print("Usage: python3 gather_data_from_an_API.py <employee_id>")
+        sys.exit(1)
 
+    try:
+        employee_id = int(sys.argv[1])
+        get_employee_info(employee_id)
+    except ValueError:
+        print("Employee ID must be an integer.")
+        sys.exit(1)

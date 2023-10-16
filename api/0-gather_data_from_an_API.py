@@ -1,44 +1,38 @@
 import requests
 import sys
 
-def get_employee_data(employee_id):
-    # Get employee details
-    employee_url = f"https://jsonplaceholder.typicode.com/users/{employee_id}"
-    employee_response = requests.get(employee_url)
-    employee_data = employee_response.json()
-    
-    # Get employee's TODO list
-    todos_url = f"https://jsonplaceholder.typicode.com/users/{employee_id}/todos"
+def get_employee_info(employee_id):
+    # Define the API endpoints
+    user_url = f'https://jsonplaceholder.typicode.com/users/{employee_id}'
+    todos_url = f'https://jsonplaceholder.typicode.com/users/{employee_id}/todos'
+
+    # Fetch employee information
+    user_response = requests.get(user_url)
+    user_data = user_response.json()
+    employee_name = user_data.get('name')
+
+    # Fetch employee's TODO list
     todos_response = requests.get(todos_url)
     todos_data = todos_response.json()
 
-    return employee_data, todos_data
+    # Calculate the number of completed and total tasks
+    total_tasks = len(todos_data)
+    completed_tasks = sum(1 for todo in todos_data if todo['completed'])
 
-def display_todo_progress(employee_name, completed_tasks, total_tasks, task_titles):
+    # Print the employee's TODO list progress in the specified format
     print(f"Employee {employee_name} is done with tasks({completed_tasks}/{total_tasks}):")
-    for title in task_titles:
-        print(f"\t{title}")
-
-def main():
-    if len(sys.argv) != 2 or not sys.argv[1].isdigit():
-        print("Usage: python script.py <employee_id>")
-        sys.exit(1)
-
-    employee_id = int(sys.argv[1])
-
-    # Get employee data
-    employee, todos = get_employee_data(employee_id)
-
-    # Extract relevant information
-    employee_name = employee.get('name')
-    completed_tasks = sum(1 for todo in todos if todo['completed'])
-    total_tasks = len(todos)
-    task_titles = [todo['title'] for todo in todos if todo['completed']]
-
-    # Display the information
-    display_todo_progress(employee_name, completed_tasks, total_tasks, task_titles)
+    for index, todo in enumerate(todos_data, start=1):
+        if todo['completed']:
+            print(f"\t{todo['title']}")
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 2:
+        print("Usage: python3 gather_data_from_an_API.py <employee_id>")
+        sys.exit(1)
 
-
+    try:
+        employee_id = int(sys.argv[1])
+        get_employee_info(employee_id)
+    except ValueError:
+        print("Employee ID must be an integer.")
+        sys.exit(1)

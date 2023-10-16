@@ -1,58 +1,44 @@
+import csv
 import requests
 import sys
-import csv
 
-"""     Using what you did in the task #0, extend your Python script to export data in the CSV format."""
+def get_employee_info(employee_id):
+    # Define the API endpoints
+    user_url = f'https://jsonplaceholder.typicode.com/users/{employee_id}'
+    todos_url = f'https://jsonplaceholder.typicode.com/users/{employee_id}/todos'
 
-def get_employee_data(employee_id):
-    
-""" Get employee details """
+    # Fetch employee information
+    user_response = requests.get(user_url)
+    user_data = user_response.json()
+    employee_id = user_data.get('id')
+    employee_name = user_data.get('username')
 
-
-    employee_url = f"https://jsonplaceholder.typicode.com/users/{employee_id}"
-    employee_response = requests.get(employee_url)
-    employee_data = employee_response.json()
-    
-    # Get employee's TODO list
-    todos_url = f"https://jsonplaceholder.typicode.com/users/{employee_id}/todos"
+    # Fetch employee's TODO list
     todos_response = requests.get(todos_url)
     todos_data = todos_response.json()
 
-    return employee_data, todos_data
+    # Create a CSV file to save the tasks
+    csv_filename = f'{employee_id}.csv'
 
-def export_to_csv(employee_id, employee_name, todos):
+    # Write tasks to CSV
+    with open(csv_filename, mode='w', newline='') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        csv_writer.writerow(["USER_ID", "USERNAME", "TASK_COMPLETED_STATUS", "TASK_TITLE"])
 
-""" function to export data to csv """
-    filename = f"{employee_id}.csv"
+        for todo in todos_data:
+            task_completed_status = "Completed" if todo['completed'] else "Not Completed"
+            csv_writer.writerow([employee_id, employee_name, task_completed_status, todo['title']])
 
-    with open(filename, mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(["USER_ID", "USERNAME", "TASK_COMPLETED_STATUS", "TASK_TITLE"])
-
-        for todo in todos:
-            writer.writerow([employee_id, employee_name, str(todo['completed']), todo['title']])
-
-    print(f"Data exported to {filename}")
-
-def main():
-    
-    """ the main function """
-
-    if len(sys.argv) != 2 or not sys.argv[1].isdigit():
-        print("Usage: python script.py <employee_id>")
-        sys.exit(1)
-
-    employee_id = int(sys.argv[1])
-
-    # Get employee data
-    employee, todos = get_employee_data(employee_id)
-
-    # Extract relevant information
-    employee_name = employee.get('name')
-
-    # Display the information
-    export_to_csv(employee_id, employee_name, todos)
+    print(f"Data has been exported to {csv_filename}.")
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 2:
+        print("Usage: python3 gather_data_from_an_API.py <employee_id>")
+        sys.exit(1)
 
+    try:
+        employee_id = int(sys.argv[1])
+        get_employee_info(employee_id)
+    except ValueError:
+        print("Employee ID must be an integer.")
+        sys.exit(1)
