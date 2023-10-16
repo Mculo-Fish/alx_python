@@ -1,46 +1,44 @@
-"""
-This module gathers and prints information about the task completion status of an employee.
-The employee data is obtained from an API endpoint.
-"""
-
 import requests
 import sys
 
 def get_employee_data(employee_id):
-    """
-    Fetches data about the employee and their tasks from an API.
-
-    Args:
-    employee_id (int): The ID of the employee.
-
-    Returns:
-    dict: The information about the employee.
-    dict: The tasks of the employee.
-    """
+    # Get employee details
+    employee_url = f"https://jsonplaceholder.typicode.com/users/{employee_id}"
+    employee_response = requests.get(employee_url)
+    employee_data = employee_response.json()
     
-    user_info = requests.get(f'https://jsonplaceholder.typicode.com/users/{employee_id}').json()
-    todos = requests.get(f'https://jsonplaceholder.typicode.com/users/{employee_id}/todos').json()
-    
-    return user_info, todos
+    # Get employee's TODO list
+    todos_url = f"https://jsonplaceholder.typicode.com/users/{employee_id}/todos"
+    todos_response = requests.get(todos_url)
+    todos_data = todos_response.json()
 
-def print_employee_tasks(user_info, todos):
-    """
-    Prints the completed tasks of an employee.
+    return employee_data, todos_data
 
-    Args:
-    user_info (dict): The information about the employee.
-    todos (dict): The tasks of the employee.
-    """
-    
-    completed_tasks = [task for task in todos if task.get('completed')]
-    
-    print(f"Employee {user_info.get('name')} is done with tasks({len(completed_tasks)}/{len(todos)}):")
-    for task in completed_tasks:
-        print(f"\t {task.get('title')}")
+def display_todo_progress(employee_name, completed_tasks, total_tasks, task_titles):
+    print(f"Employee {employee_name} is done with tasks({completed_tasks}/{total_tasks}):")
+    for title in task_titles:
+        print(f"\t{title}")
+
+def main():
+    if len(sys.argv) != 2 or not sys.argv[1].isdigit():
+        print("Usage: python script.py <employee_id>")
+        sys.exit(1)
+
+    employee_id = int(sys.argv[1])
+
+    # Get employee data
+    employee, todos = get_employee_data(employee_id)
+
+    # Extract relevant information
+    employee_name = employee.get('name')
+    completed_tasks = sum(1 for todo in todos if todo['completed'])
+    total_tasks = len(todos)
+    task_titles = [todo['title'] for todo in todos if todo['completed']]
+
+    # Display the information
+    display_todo_progress(employee_name, completed_tasks, total_tasks, task_titles)
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python3 0-gather_data_from_an_API.py <employee_id>")
-    else:
-        user_info, todos = get_employee_data(sys.argv[1])
-        print_employee_tasks(user_info, todos)
+    main()
+
+
