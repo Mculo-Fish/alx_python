@@ -1,38 +1,26 @@
+#!/usr/bin/python3
 import requests
 import sys
 
-def get_employee_info(employee_id):
-    # Define the API endpoints
-    user_url = f'https://jsonplaceholder.typicode.com/users/{employee_id}'
-    todos_url = f'https://jsonplaceholder.typicode.com/users/{employee_id}/todos'
+if __name__=="__main__":
+    user_id = sys.argv[1]
+    todo_url = "https://jsonplaceholder.typicode.com/users/{}/todos".format(user_id)
+    user_url = "https://jsonplaceholder.typicode.com/users/{}".format(user_id)
 
-    # Fetch employee information
+
+    todo_response = requests.get(todo_url)
     user_response = requests.get(user_url)
+
+    todo_data = todo_response.json()
     user_data = user_response.json()
-    employee_name = user_data.get('name')
 
-    # Fetch employee's TODO list
-    todos_response = requests.get(todos_url)
-    todos_data = todos_response.json()
+ # Extract relevant information
+    employee_name = user_data["name"]
+    total_tasks = len(todo_data)
+    completed_tasks = [task for task in todo_data if task["completed"]]
+    number_of_done_tasks = len(completed_tasks)
 
-    # Calculate the number of completed and total tasks
-    total_tasks = len(todos_data)
-    completed_tasks = sum(1 for todo in todos_data if todo['completed'])
-
-    # Print the employee's TODO list progress in the specified format
-    print(f"Employee {employee_name} is done with tasks({completed_tasks}/{total_tasks}):")
-    for index, todo in enumerate(todos_data, start=1):
-        if todo['completed']:
-            print(f"\t{todo['title']}")
-
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python3 gather_data_from_an_API.py <employee_id>")
-        sys.exit(1)
-
-    try:
-        employee_id = int(sys.argv[1])
-        get_employee_info(employee_id)
-    except ValueError:
-        print("Employee ID must be an integer.")
-        sys.exit(1)
+    # Print the required output format
+    print("Employee {} is done with tasks({}/{}):".format(employee_name,number_of_done_tasks,total_tasks))
+    for task in completed_tasks:
+        print("\t {}".format(task['title']))
